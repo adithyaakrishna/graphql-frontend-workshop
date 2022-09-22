@@ -37,12 +37,36 @@ function Home({ filter }) {
     const fetchArticles = async (filter = '') => {
       try {
         const data = await fetch(
-          `https://dev.to/api/articles${filter ? `?tag=${filter}` : ''}`,
+          `https://glenmorepark.stepzen.net/api/newsapp/__graphql`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'apikey glenmorepark::stepzen.net+1000::40322d7cba5ba22692c1fd6a1eb79d4b478998332d09f137c8fedc18488ae4a5'
+            },
+            body: JSON.stringify({
+              query: `
+              query GetArticles($tag: String){
+                articles(tag: $tag) {
+                  id
+                  title
+                  description
+                  user {
+                    username
+                  }
+                }
+              }
+              `,
+              variables: {
+                tag: filter,
+              },
+            }),
+          },
         );
         const result = await data.json();
 
-        if (result) {
-          setArticles(result);
+        if (result?.data?.articles) {
+          setArticles(result.data.articles);
         }
       } catch (e) {
         console.log('Error', e.message);
